@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quintenzirkel &amp; Tonleitern</title>
+<meta name="description" content="Interaktiver Quintenzirkel mit Tonleitern, Notenzeile, Klaviatur, Griffbrett und Intervallen">
+<meta name="theme-color" content="#7048e8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<p class="sub">Der Rahmen bleibt oben stehen, der Quintenzirkel dreht sich: In der Mitte steht die Tonika, links die Subdominante, rechts die Dominante – jeweils mit den Parallelen in Moll. Alle Bereiche lassen sich ein- und ausklappen.</p>
+
+<div class="wrap" id="board">
+
+  <!-- Quintenzirkel mit Pfeiltasten in der Mitte -->
+  <section class="card panel left" data-panel="circle" aria-label="Quintenzirkel">
+    <header class="phead">
+      <h2 class="ptitle"><button type="button" class="ptoggle">Quintenzirkel <span class="pkey" id="circKey"></span></button></h2>
+      <span class="psize" role="group" aria-label="Größe des Quintenzirkels">
+        <button type="button" id="cMinus" aria-label="Quintenzirkel verkleinern" title="Kleiner">−</button>
+        <button type="button" id="cPlus" aria-label="Quintenzirkel vergrößern" title="Größer">+</button>
+      </span>
+      <span class="mini" role="group" aria-label="Tonart wechseln">
+        <button type="button" data-go="left" aria-label="Quinte abwärts" title="Quinte abwärts">←</button>
+        <button type="button" data-go="down" aria-label="Paralleltonart Moll" title="Moll (Parallele)">↓</button>
+        <button type="button" data-go="up" aria-label="Dur" title="Dur">↑</button>
+        <button type="button" data-go="right" aria-label="Quinte aufwärts" title="Quinte aufwärts">→</button>
+      </span>
+    </header>
+    <div class="pbody circbody">
+      <div class="circchord" id="circChord" aria-live="polite"></div>
+      <svg class="circ" id="circle" viewBox="-235 -235 470 470" role="img" aria-label="Quintenzirkel">
+        <g id="circRing"></g>
+        <g id="circFixed"></g>
+      </svg>
+      <div class="spellsw" id="spellSw" role="group" aria-label="Schreibweise der Akkordtöne" hidden>
+        <button type="button" data-spell="einfach" title="Einfache Namen: F statt Eis, C statt His">Einfach</button><button type="button" data-spell="korrekt" title="Genaue Schreibweise nach Terzenschichtung (Eis, His …)">Korrekt</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rechts: Tonleiter, direkt darunter die Klaviatur (Intervalle per Knopf in ihrer Kopfzeile) -->
+  <div class="right" id="rightCol">
+
+    <section class="card panel" data-panel="scale" aria-label="Tonleiter">
+      <header class="phead schead">
+        <h2 class="ptitle"><button type="button" class="ptoggle"><span id="scTitle">Tonleiter</span> <span class="pkey" id="title"></span></button></h2>
+        <div class="modes" id="modes"></div>
+      </header>
+      <div class="pbody">
+        <div class="scalebody" id="scaleBody">
+          <div class="scroll staffwrap"><button type="button" id="play" class="staffplay" aria-label="Tonleiter bzw. Akkordtöne nacheinander abspielen" title="Nacheinander abspielen">▶</button><button type="button" id="stDown" class="starrow l" title="Eine Oktave tiefer" aria-label="Eine Oktave tiefer">‹</button><button type="button" id="chordPlay" class="starrow l chordplay" title="Akkord anhören" aria-label="Akkord anhören" style="display:none">▶</button><button type="button" id="stUp" class="starrow r" title="Eine Oktave höher" aria-label="Eine Oktave höher">›</button><button type="button" id="clefBtn" class="clefbtn" title="Schlüssel wechseln">Bass</button><svg id="staff" class="sw" viewBox="0 0 640 198" role="img" aria-label="Tonleiter in Notenschrift"></svg></div>
+          <div class="info" id="info"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card panel" data-panel="keys" aria-label="Klaviatur">
+      <header class="phead">
+        <h2 class="ptitle"><button type="button" class="ptoggle">Klaviatur</button></h2>
+        <button type="button" class="ivbtn" id="ivBtn" aria-expanded="false" aria-controls="ivBox" title="Intervalle zum Grundton ein-/ausblenden">Intervalle <span class="lchev"></span></button>
+      </header>
+      <div class="pbody">
+        <div class="scroll"><svg id="keys" class="sw" viewBox="0 0 560 116" role="img" aria-label="Klaviatur mit markierten Tönen"></svg></div>
+        <div class="scroll ivbox" id="ivBox" hidden><table id="tbl"></table>
+          <div class="lg" data-legend="iv">
+            <button type="button" class="ltoggle" aria-expanded="false" title="Abkürzungen erklären">Legende <span class="lchev"></span></button>
+            <div class="lgbody" hidden>
+              <div class="legend ivlegend">
+                <span><b>R</b> rein · <b>K</b> klein · <b>G</b> groß · <b>V</b> vermindert · <b>Ü</b> übermäßig</span>
+                <span><b>P</b> Prim · <b>S</b> Sekunde · <b>T</b> Terz · <b>Qt</b> Quarte · <b>Qn</b> Quinte</span>
+                <span><b>Sx</b> Sexte · <b>Sp</b> Septime · <b>N</b> None · <b>O</b> Oktave · <b>HT</b> Halbton</span>
+                <span>Beispiele: <b>KT</b> kleine Terz · <b>GT</b> große Terz · <b>RQn</b> reine Quinte · <b>GSp</b> große Septime</span>
+              </div>
+            </div>
+          </div></div>
+      </div>
+    </section>
+
+
+
+
+    <section class="card belowcard" aria-label="Akkorde und Tonart finden">
+    <div class="below" id="below">
+      <div class="btabs">
+        <button type="button" class="ltoggle btab" data-tab="chords" aria-expanded="false" title="Sonderakkorde über dem Grundton">Akkorde über dem Grundton <span class="lchev"></span></button>
+        <button type="button" class="ltoggle btab" data-tab="finder" aria-expanded="false" title="Akkorde antippen, um die Tonart zu finden">Tonart aus Akkorden finden <span class="lchev"></span></button>
+      </div>
+      <div class="bpanel" id="bpChords" hidden><div id="chordChips"></div></div>
+      <div class="bpanel" id="bpFinder" hidden><div id="finder"></div></div>
+    </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- Griffbrett: immer unten, über die ganze Breite, nur quer; per Knopf maximierbar -->
+<section class="card panel fbfull" data-panel="fret" id="fbPanel" aria-label="Griffbrett">
+  <header class="phead fbhead">
+    <h2 class="ptitle"><button type="button" class="ptoggle">Griffbrett <span class="pkey" id="fbTitle"></span></button></h2>
+    <div class="seg" id="fbDM" role="group" aria-label="Dur oder Moll"></div>
+    <div class="seg" id="fbInst" role="group" aria-label="Instrument"></div>
+    <span class="mini maxkeys" role="group" aria-label="Tonart wechseln">
+      <button type="button" data-go="left" aria-label="Quinte abwärts" title="Quinte abwärts">←</button>
+      <button type="button" data-go="down" aria-label="Paralleltonart Moll" title="Moll (Parallele)">↓</button>
+      <button type="button" data-go="up" aria-label="Dur" title="Dur">↑</button>
+      <button type="button" data-go="right" aria-label="Quinte aufwärts" title="Quinte aufwärts">→</button>
+    </span>
+    <div class="seg" id="fbLabel" role="group" aria-label="Beschriftung">
+      <button type="button" data-l="ton">Ton</button><button type="button" data-l="stufe">Stufe</button>
+    </div>
+    <div class="fbgrp" role="group" aria-label="Ansicht und Position">
+      <div class="seg" id="fbMode"></div>
+      <span class="lagenctl" id="lagenCtl" hidden>
+        <button type="button" id="lagePrev" aria-label="vorige Lage" title="vorige Lage">‹</button>
+        <span id="lageLbl"></span>
+        <button type="button" id="lageNext" aria-label="nächste Lage" title="nächste Lage">›</button>
+        <button type="button" id="shapeMore" class="shapemore" aria-pressed="false" hidden>+</button>
+      </span>
+    </div>
+    <button type="button" id="fbMax" aria-pressed="false" title="Griffbrett maximieren (Esc beendet)" aria-label="Griffbrett maximieren">⤢</button>
+  </header>
+  <div class="pbody">
+    <div class="fbwrap" id="fbWrap"><svg id="fretboard" role="img" aria-label="Griffbrett mit den Tönen der Tonleiter"></svg></div>
+    <div class="lg" data-legend="fret">
+      <button type="button" class="ltoggle" aria-expanded="false" title="Legende ein-/ausblenden">Legende <span class="lchev"></span></button>
+      <div class="lgbody" hidden>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--root)"></i>Grundton</span>
+          <span><i class="dot" style="background:var(--third)"></i>Terz</span>
+          <span><i class="dot" style="background:var(--fifth)"></i>Quinte</span>
+          <span><i class="dot" style="background:var(--dotgrey);box-shadow:0 0 0 1px #8d887c inset"></i>übrige Töne</span>
+          <span>gestrichelter Ring = leere Saite, nicht in der Tonleiter</span>
+          <span>gestrichelter Rahmen = Position mit vier Fingern (Zeigefinger am linken Rand); gestrichelter Kreis = Dehnung; blasser Rahmen = dasselbe Muster eine Oktave höher</span>
+        </div>
+      </div>
+    </div>
+    <p class="maxhint">Tipp: Tablet quer halten – dann wird das Griffbrett größer.</p>
+  </div>
+</section>
+
+<script src="js/util.js"></script>
+<script src="js/theory.js"></script>
+<script src="js/circle.js"></script>
+<script src="js/staff.js"></script>
+<script src="js/keyboard.js"></script>
+<script src="js/fretboard.js"></script>
+<script src="js/table.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/finder.js"></script>
+<script src="js/chords.js"></script>
+<script src="js/panels.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

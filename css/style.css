@@ -1,0 +1,480 @@
+:root{
+  --bg:#f6f4ef;--card:#fff;--fg:#1f1d1a;--muted:#6b665e;--line:#d9d4c8;
+  --seg:#efebe0;--seg2:#e4dfd0;--acc:#7048e8;--accbg:#e5dbff;
+  --root:#d9480f;--third:#1c7ed6;--fifth:#2f9e44;--onrole:#fff;--dotgrey:#cfcabd;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#17161a;--card:#222126;--fg:#eeebe4;--muted:#a09a8e;--line:#3a3840;
+    --seg:#2c2b32;--seg2:#38363f;--acc:#b197fc;--accbg:#4a3f7a;
+    --root:#ff8a50;--third:#74b9ff;--fifth:#69db7c;--onrole:#14130f;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--fg);
+  font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;
+  padding:calc(10px + env(safe-area-inset-top,0px)) calc(10px + env(safe-area-inset-right,0px))
+          calc(10px + env(safe-area-inset-bottom,0px)) calc(10px + env(safe-area-inset-left,0px));
+}
+body.fb-max{overflow:hidden}
+h1{font-size:1.15rem;margin:0 0 2px}
+h2{font-size:.95rem;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 8px;font-size:.85rem}
+
+/* ---------- Layout ----------
+ * .wrap  = links der Quintenzirkel, rechts eine Spalte (Tonleiter, darunter Klaviatur, Intervalle).
+ * Darunter, über die volle Breite: das Griffbrett (.fbfull). */
+.wrap{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;max-width:1600px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 10px 10px}
+.left{flex:1 1 100%;max-width:calc(var(--cs,1) * 560px);margin:0 auto}
+.right{flex:1 1 100%;min-width:0;display:flex;flex-direction:column;gap:10px}
+.scroll{overflow-x:auto}
+.sw{width:100%;display:block;max-height:46vh}
+@media (max-width:640px){#keys{min-width:520px}.info{font-size:.78rem;gap:4px 10px}}
+
+/* Tablet quer: Quintenzirkel links (Größe aus der Bildschirmhöhe, mit Faktor --cs), Rest rechts */
+@media (orientation:landscape) and (min-width:760px){
+  .sub{display:none}
+  .wrap{flex-wrap:nowrap}
+  .left{flex:0 0 auto;width:calc(var(--cs,1) * clamp(340px,calc(100vh - 140px),54vw));max-width:none;margin:0}
+  .right{flex:1 1 0}
+}
+/* Nur bei genug Höhe (und nicht in der großen Ansicht) bleibt der Quintenzirkel beim Scrollen stehen */
+@media (orientation:landscape) and (min-width:760px) and (min-height:700px){
+  .left:not(.big){position:sticky;top:10px}
+}
+/* Quintenzirkel eingeklappt: schmale Leiste oben, der Rest bekommt die ganze Breite */
+.wrap.circ-collapsed{flex-wrap:wrap}
+.wrap.circ-collapsed .left{flex:1 1 100%;width:100%;max-width:none;margin:0;position:static}
+
+/* ---------- Bedienelemente ---------- */
+button{font:inherit;border:1px solid var(--line);background:var(--seg);color:var(--fg);border-radius:8px;padding:6px 10px;cursor:pointer}
+button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+button:disabled{opacity:.35;cursor:default}
+button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.toprow{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.modes{display:flex;gap:6px;flex-wrap:wrap}
+.hint{text-align:center;color:var(--muted);font-size:.75rem;margin:6px 0 0}
+@media (hover:none){.hint{display:none}}
+.seg{display:inline-flex}
+.seg button{border-radius:0;margin-left:-1px}
+.seg button:first-child{border-radius:8px 0 0 8px;margin-left:0}
+.seg button:last-child{border-radius:0 8px 8px 0}
+
+/* ---------- Kopfzeile der Bereiche ---------- */
+.phead{display:flex;align-items:center;gap:6px;min-height:38px}
+.ptitle{margin:0;flex:1;min-width:0;font-size:.95rem}
+.phead .ptoggle{display:block;width:100%;text-align:left;background:none;border:0;padding:8px 2px;font-weight:700;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pkey{font-weight:500;color:var(--acc);margin-left:8px}
+.phead .pchev{background:none;border:0;padding:10px 8px;display:flex;align-items:center}
+.psize,.mini{display:inline-flex;gap:3px;flex:none}
+.psize button,.mini button{min-width:32px;min-height:32px;padding:0 6px;font-size:.85rem;line-height:1}
+.mini{display:none}
+.panel.collapsed .mini{display:inline-flex}
+.panel.collapsed .psize{display:none}
+.chev{flex:none;width:10px;height:10px;border-right:2.5px solid var(--muted);border-bottom:2.5px solid var(--muted);transform:rotate(45deg);margin:-4px 4px 0 0;transition:transform .2s}
+.panel:not(.collapsed) .chev{transform:rotate(-135deg);margin-top:4px}
+.pbody{margin-top:2px}
+
+/* ---------- Quintenzirkel ---------- */
+.circ{display:block;margin:0 auto;width:100%;height:auto;max-height:70vh}
+.circ text{pointer-events:none;fill:var(--fg)}
+#circRing path{cursor:pointer;stroke:var(--card);stroke-width:2;transition:fill .15s}
+#circRing path:hover{fill:var(--seg2)}
+.cbtn{cursor:pointer;outline:none}
+.cbtn rect{fill:var(--seg);stroke:var(--line);stroke-width:1.2;transition:fill .12s}
+.cbtn:hover rect{fill:var(--seg2)}
+.cbtn:active rect{fill:var(--accbg)}
+.cbtn:focus-visible rect{stroke:var(--acc);stroke-width:2.5}
+.left .lg{text-align:center}
+.left .legend{justify-content:center}
+
+
+/* ---------- Legenden: dezent, standardmäßig zu ---------- */
+.lg{margin-top:2px}
+.ltoggle{display:inline-flex;align-items:center;gap:5px;background:none;border:0;padding:4px 2px;color:var(--muted);font-size:.75rem;opacity:.85}
+.ltoggle:hover{opacity:1}
+.lchev{width:6px;height:6px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(45deg);transition:transform .2s;margin-top:-3px}
+.ltoggle[aria-expanded="true"] .lchev{transform:rotate(-135deg);margin-top:2px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--muted);margin:2px 0 0}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.info{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0 0;font-size:.9rem}
+.info b{color:var(--acc)}
+
+/* ---------- Griffbrett (unten, volle Breite) ---------- */
+.fbfull{max-width:1600px;margin:10px auto 0}
+/* Alle Bedienelemente des Griffbretts stehen in der Kopfzeile */
+.fbhead{flex-wrap:wrap;gap:6px 8px}
+.fbhead .ptitle{flex:1 1 auto}
+.fbhead .seg button,.fbhead #fbMax{min-height:34px;padding:3px 12px;white-space:nowrap}
+.ivbtn{display:inline-flex;align-items:center;gap:5px;background:none;border:0;padding:6px 4px;color:var(--muted);font-size:.8rem}
+.ivbtn[aria-expanded="true"] .lchev{transform:rotate(-135deg);margin-top:2px}
+.ivbox{margin-top:6px}
+.fbwrap{overflow:hidden}
+#fretboard{display:block;width:100%;height:auto}
+.fb-tuning{margin:4px 0 0;font-weight:600;font-size:.9rem}
+.fb-note{margin:0 0 4px;color:var(--muted);font-size:.85rem}
+.maxhint{display:none;color:var(--muted);font-size:.8rem;margin:6px 0 0;text-align:center}
+
+/* Maximiert: das Panel legt sich über die ganze Seite, das SVG füllt den freien Platz */
+.fbfull.max{
+  position:fixed;inset:0;z-index:100;max-width:none;margin:0;border-radius:0;overflow:auto;
+  display:flex;flex-direction:column;
+  padding:calc(8px + env(safe-area-inset-top,0px)) calc(12px + env(safe-area-inset-right,0px))
+          calc(8px + env(safe-area-inset-bottom,0px)) calc(12px + env(safe-area-inset-left,0px));
+}
+.fbfull.max .pbody{flex:1;display:flex;flex-direction:column;min-height:0}
+.fbfull.max .fbwrap{flex:1 1 0;min-height:0;position:relative}
+.fbfull.max #fretboard{position:absolute;inset:0;width:100%;height:100%}
+.fbfull.max .pchev{display:none}
+.fbfull.max .fbhead .ptitle{flex:0 1 auto}
+.fbfull.max .maxkeys{display:inline-flex}
+@media (orientation:portrait){.fbfull.max .maxhint{display:block}}
+
+/* ---------- Intervall-Tabelle (Stufen als Spalten) ---------- */
+table{border-collapse:collapse;width:100%;font-size:.8rem;margin-top:4px;table-layout:fixed}
+th,td{text-align:center;padding:4px 3px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+th{color:var(--muted);font-weight:600;font-size:.72rem;width:62px;text-align:left}
+td.imp{font-weight:700}
+
+/* ---------- Tonart finden / Blöcke ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:3px;align-items:center;margin:4px 0}
+.chiplbl{width:30px;color:var(--muted);font-size:.75rem}
+.chip{min-width:30px;min-height:34px;padding:2px 4px;font-size:.82rem}
+.chip.diat{border:1px dashed var(--acc)}
+.chip.sel{background:var(--acc);color:#fff;border:1px solid var(--acc)}
+.fdres{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0 2px;font-size:.85rem;color:var(--muted)}
+.cand{padding:4px 10px;font-size:.85rem}
+#fbBlocks button{min-width:44px}
+#fbBlocks .blab{color:var(--muted);font-size:.8rem;margin-right:2px}
+#finder{display:flex;flex-wrap:wrap;gap:6px 16px}
+.fgroup{flex:1 1 240px;min-width:0}
+.fglbl{color:var(--muted);font-size:.75rem;margin:2px 0}
+.chipgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:3px}
+.chipgrid .chip{min-width:0;width:100%}
+#finder .fdres{flex:1 1 100%}
+#fbMode{margin-bottom:4px}
+
+/* ---------- Akkord-Auswahl ---------- */
+.chordrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin:0 0 6px;font-size:.85rem;color:var(--muted)}
+#chordSel{font:inherit;color:var(--fg);background:var(--seg);border:1px solid var(--line);border-radius:8px;padding:6px 8px;min-height:36px;max-width:100%}
+.chexp{flex:1 1 100%;color:var(--muted)}
+.chexp b{color:var(--fg)}
+
+/* ---------- Unter dem Quintenzirkel ---------- */
+.modeline{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}
+.btabs{display:flex;flex-wrap:wrap;gap:4px 14px;justify-content:center;margin-top:4px}
+.btab{font-size:.8rem}
+.btab.on{color:var(--acc);opacity:1;font-weight:600}
+.btab.on .lchev{transform:rotate(-135deg);margin-top:2px}
+.bpanel{margin-top:4px}
+.cgrp{display:flex;flex-wrap:wrap;gap:3px;align-items:center;margin:3px 0}
+.cgrp .fglbl{width:84px;margin:0}
+#chordChips .chip{width:auto;min-width:0;padding:2px 8px;min-height:32px}
+.btab.on{background:none;border-color:transparent;color:var(--acc)}
+#chordSel{width:150px;max-width:100%;text-overflow:ellipsis}
+.toprow{align-items:center}
+
+.fb-lagen{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin-top:6px}
+.fb-lagen .seg button{min-height:34px;padding:3px 12px}
+.lagenctl{display:inline-flex;align-items:center;gap:6px;font-size:.9rem}
+.lagenctl button{min-width:34px;min-height:34px;padding:0}
+
+/* ---------- Tonleiter: Bedienung in der Kopfzeile, Akkord-Erklärung neben der Notenzeile ---------- */
+.schead{flex-wrap:wrap;gap:4px 6px}
+.schead .ptitle{flex:0 1 auto;min-width:0}
+.schead .pchev{margin-left:auto}
+.schead .modes{gap:4px;flex-wrap:nowrap}
+.schead .modes button,.schead #play{padding:4px 9px;font-size:.85rem;min-height:34px}
+.schead #chordSel{width:118px;min-height:34px;padding:3px 6px;font-size:.85rem}
+.panel.collapsed .schead .modes,.panel.collapsed .schead #chordSel,.panel.collapsed .schead #play{display:none}
+.scalebody{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:flex-start}
+.scalebody .scroll{flex:1 1 100%;min-width:0}
+.scalebody .info{flex:1 1 100%}
+.scalebody.chord .info{flex:1 1 180px;flex-direction:column;gap:6px;margin:6px 0 0;min-width:0}
+.scalebody.chord .sw{min-width:0}
+.scalebody.chord .chexp{flex:none}
+
+/* ---------- Layout-Feinschliff: Akkord-Karte unter der Klaviatur, breite Kopfzeile ---------- */
+.belowcard{padding:6px 10px 10px}
+.belowcard .btabs{justify-content:flex-start;margin-top:0}
+#chordChips{display:flex;flex-wrap:wrap;gap:4px 22px}
+.cgrp{flex:1 1 200px;display:flex;flex-wrap:wrap;gap:3px;align-items:center;margin:3px 0}
+.cgrp .fglbl{flex:1 1 100%;width:auto}
+.schead #chordSel{flex:1 1 120px;max-width:230px;width:auto}
+.schead #play{margin-left:auto}
+.schead .pchev{margin-left:0}
+
+.belowcard{max-width:1600px;margin:10px auto 0}
+.schead #chordSel{flex:1 1 70px;min-width:70px;max-width:170px}
+#chordChips{align-items:flex-start}
+.cgrp{align-content:flex-start}
+
+/* ---------- Feinschliff 3 ---------- */
+.belowcard{max-width:none;margin:0}
+.schead #chordSel{margin-left:auto;flex:0 1 150px;min-width:80px}
+.schead #play{margin-left:0}
+@media (orientation:landscape) and (min-width:760px){
+  .wrap:not(.circ-collapsed){align-items:stretch}
+  .wrap:not(.circ-collapsed) .left{position:static;display:flex;flex-direction:column}
+  .wrap:not(.circ-collapsed) .left .pbody{flex:1;display:flex;align-items:center}
+}
+
+/* ---------- Griffbrett-Kopfzeile: alles in einer Zeile, optisch gruppiert ---------- */
+.fbhead{flex-wrap:nowrap;gap:8px}
+.fbhead>*{flex:0 0 auto}
+.fbhead .ptitle{flex:1 1 auto;min-width:0}
+.fbhead .ptitle button{white-space:nowrap}
+.fbgrp{display:inline-flex;align-items:center;gap:6px;padding-left:10px;margin-left:2px;border-left:2px solid var(--line,#d8d2c4)}
+#lageLbl{min-width:4.6em;text-align:center;white-space:nowrap;font-weight:600}
+@media (max-width:900px){.fbhead{flex-wrap:wrap}.fbgrp{border-left:0;padding-left:0}}
+
+/* ---------- Griffbrett-Kopfzeile: mehr Luft zwischen den Gruppen ---------- */
+.fbhead{gap:10px 22px}
+.fbhead .ptitle{margin-right:auto}
+.fbgrp{gap:12px;padding-left:22px;margin-left:0}
+.lagenctl{gap:8px;padding:0 4px}
+#lageLbl{min-width:9.5em}
+#fbFinger{min-height:34px;padding:3px 12px}
+#fbFinger[hidden]{display:none}
+.fbhead #fbMax{margin-left:2px}
+@media (max-width:900px){.fbhead{gap:8px 12px}.fbgrp{padding-left:0;gap:8px}}
+.fbhead{gap:10px 14px}
+.fbgrp{gap:10px;padding-left:16px}
+#lageLbl{min-width:8.6em}
+.fbhead .ptitle{flex:1 1 auto;min-width:11em}
+#lageLbl{min-width:10.5em}
+#lageLbl{min-width:7.8em}
+.fbhead{gap:8px 9px}
+.fbgrp{gap:7px;padding-left:12px}
+.lagenctl{gap:5px;padding:0}
+#lageLbl{min-width:6.6em}
+.fbhead .ptitle{min-width:0}
+.fbhead .seg button,.fbhead #fbMax,#fbFinger{padding:3px 10px}
+
+/* ---------- Handy quer (niedriger Bildschirm): Quintenzirkel so groß wie die Bildschirmhöhe, der Rest daneben ---------- */
+@media (orientation:landscape) and (max-height:520px){
+  body{padding:6px}
+  h1,.sub{display:none}
+  .wrap:not(.circ-collapsed){flex-wrap:nowrap;align-items:flex-start}
+  .wrap:not(.circ-collapsed) .left{flex:0 0 auto;position:static;display:block;max-width:60vw;
+    width:calc(var(--cs,1) * (100vh - 12px))}
+  .wrap:not(.circ-collapsed) .left .pbody{display:block}
+  .wrap:not(.circ-collapsed) .right{flex:1 1 0}
+  .circ{max-height:none}
+  .sw{max-height:none}
+  .belowcard{padding:4px 8px}
+}
+@media (orientation:landscape) and (max-height:520px){
+  .right{gap:6px}
+  .right .card{padding:4px 8px 6px}
+  .right .phead{min-height:0;margin-bottom:2px}
+  .right .phead button{min-height:30px}
+  .sw{max-height:none}
+  .info{font-size:.72rem;line-height:1.25;margin-top:2px}
+  .belowcard{max-width:none;margin:6px 0 0}
+}
+@media (orientation:landscape) and (max-height:520px){
+  .schead{flex-wrap:nowrap}
+  .schead #chordSel{display:none}           /* Akkorde stehen in der Karte darunter */
+  .schead #play{margin-left:auto}
+  #keys{max-height:21vh}
+  .info{font-size:.68rem}
+  .info>*{margin-right:8px}
+}
+@media (orientation:landscape) and (max-height:520px){
+  .wrap:not(.circ-collapsed) .left{width:calc(var(--cs,1) * (100vh - 52px))}
+  .schead .pkey{display:none}
+  .schead .modes button{padding:3px 9px}
+}
+
+@media (orientation:landscape) and (max-height:520px){
+  .wrap:not(.circ-collapsed) .left{width:calc(var(--cs,1) * (100vh - 8px));max-width:52vw}
+}
+@media (orientation:landscape) and (max-height:520px){
+  .wrap:not(.circ-collapsed) .left{width:calc(var(--cs,1) * (100vh + 30px));max-width:55vw}
+}
+@media (max-width:900px){.fbgrp{flex-wrap:wrap;max-width:100%}}
+@media (orientation:landscape) and (max-height:520px){
+  .wrap:not(.circ-collapsed) .left{width:calc(var(--cs,1) * (100vh + 10px));max-width:50vw}
+  .schead{gap:4px}
+  .schead .ptitle{flex:0 0 auto;min-width:0}
+  .schead .modes button{padding:3px 7px;font-size:.85rem}
+}
+@media (orientation:landscape) and (max-height:520px){
+  .panel[data-panel=keys] .phead{display:none}
+  .schead .ivbtn{font-size:.78rem;padding:2px 4px;white-space:nowrap}
+  .schead #play,.schead .modes button,.schead .pchev{min-height:28px}
+  .schead #play{min-width:34px;padding:0 6px}
+  #keys{max-height:none}
+}
+
+.info:empty{display:none}
+/* ---------- Griffbrett-Kopf im Hochformat: klein und kompakt ---------- */
+.fbwrap{-webkit-overflow-scrolling:touch}
+@media (max-width:640px){
+  .fbhead{gap:5px 6px;min-height:0}
+  .fbhead .ptitle{order:0;flex:1 1 auto;font-size:.95rem}
+  .fbhead #fbMax{order:1;margin-left:0}
+  .fbhead .pchev{order:2}
+  .fbhead #fbInst{order:3}
+  .fbhead #fbLabel{order:4}
+  .fbhead .fbgrp{order:5;flex:1 1 100%;padding:0;border:0;gap:5px}
+  .fbhead .seg button,.fbhead #fbMax,#fbFinger,.lagenctl button{min-height:28px;padding:2px 8px;font-size:.8rem}
+  .lagenctl button{min-width:28px;padding:0}
+  .lagenctl{font-size:.8rem;gap:4px}
+  #lageLbl{min-width:5.2em}
+  .fb-lagen{display:none}
+}
+@media (max-width:640px){
+  #lageLbl{min-width:0;font-size:.78rem}
+  .lagenctl{gap:2px}
+  .fbhead .fbgrp #fbMode{flex:0 0 auto}
+  .fbhead .seg button{padding:2px 6px}
+}
+
+/* Schlüssel-Knopf unter dem Notenschlüssel */
+.staffwrap{position:relative}
+.clefbtn{position:absolute;left:4px;bottom:6px;z-index:2;font-size:.72rem;line-height:1;padding:5px 9px;min-height:26px;border-radius:999px;
+  background:var(--seg);border:1px solid var(--line);color:var(--fg)}
+.clefbtn:hover{border-color:var(--acc);color:var(--acc)}
+.clefbtn{bottom:auto;top:14px;left:3px;padding:4px 8px;font-size:.7rem}
+.clefbtn{left:6px}
+@media (max-width:640px){.clefbtn{padding:3px 6px;left:4px;font-size:.66rem;min-height:22px}}
+
+/* Kleine Pfeile links und rechts der Notenzeile: Tonleiter stufenweise hinauf/hinunter */
+.staffwrap{padding:0 22px}
+.starrow{position:absolute;top:50%;transform:translateY(-50%);width:20px;height:44px;padding:0;border:0;border-radius:6px;background:none;
+  color:var(--muted);font-size:1.3rem;line-height:1;cursor:pointer;z-index:2}
+.starrow.l{left:0}.starrow.r{right:0}
+.starrow:hover:not(:disabled){color:var(--acc);background:var(--seg)}
+.starrow:disabled{opacity:.25;cursor:default}
+.scalebody.chord .staffwrap{padding:0}
+.staffwrap{padding:0 28px}
+.starrow{width:28px;height:64px;font-size:2rem;font-weight:300}
+.scalebody.chord .staffwrap{padding:0}
+
+/* große Pfeile: etwa zwei Drittel so hoch wie die Notenzeile, mittig auf der mittleren Notenlinie */
+.staffwrap{padding:0 36px}
+.starrow{width:34px;height:66%;font-size:0;transform:translateY(-50%)}
+.starrow::before{content:"";display:block;width:16px;height:16px;border-top:4px solid currentColor;border-right:4px solid currentColor;border-radius:2px;margin:auto}
+.starrow.r::before{transform:rotate(45deg);margin-left:6px}
+.starrow.l::before{transform:rotate(-135deg);margin-right:6px}
+.scalebody.chord .staffwrap{padding:0}
+
+/* Akkorde: Höhe der Tonleiter-Karte bleibt beim Durchklicken gleich, damit die Seite nicht springt (Werte = höchste Erklärung) */
+.scalebody.chord{min-height:382px}
+@media (max-width:899px){.scalebody.chord{min-height:440px}}
+@media (max-width:640px){.scalebody.chord{min-height:310px}}
+@media (orientation:landscape) and (max-height:520px){.scalebody.chord{min-height:240px}}
+
+/* Grundton-Blitz im Quintenzirkel beim Spielen */
+.rootflash{fill:#fff;stroke:var(--acc);stroke-width:3;pointer-events:none;animation:rootflash 1.5s ease-out forwards}
+@keyframes rootflash{0%{opacity:0}15%{opacity:.75}100%{opacity:0}}
+
+/* Kein Springen beim Durchklicken der Akkorde: Erklärung immer in eigener Zeile unter der Notenzeile (nie wechselnd daneben) */
+.scalebody.chord{flex-wrap:wrap}
+.scalebody.chord .info{flex:1 1 100%;flex-direction:row;flex-wrap:wrap;gap:4px 14px}
+
+/* Intervall-Tabelle: Namen nie umbrechen (sonst wird die Tabelle je nach Akkord höher und der Rest springt) */
+.ivbox td,.ivbox th,.ivbox table{white-space:nowrap}
+
+/* ---------- Griffbrett-Kopf: Gruppen farblich abgesetzt, Finger-Schalter ganz rechts ---------- */
+.fbgrp{background:var(--seg);border:0;border-radius:12px;padding:4px 8px;margin-left:0}
+.fbhead #fbInst,.fbhead #fbLabel{background:var(--seg);border-radius:12px;padding:3px}
+#fbFinger{order:8;margin-left:auto;border-radius:12px;white-space:nowrap}
+#fbFinger.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.fbhead #fbMax{order:9}
+@media (max-width:640px){
+  .fbhead .fbgrp{flex:1 1 100%;max-width:100%}
+  .fbhead #fbFinger{order:6;margin-left:auto}
+  .fbhead #fbMax{order:1}
+}
+@media (orientation:landscape) and (max-height:520px){
+  #lageLbl{min-width:0;white-space:nowrap;overflow:visible}
+  .lagenctl{gap:4px;flex:none;white-space:nowrap}
+  .lagenctl button{min-width:22px;padding:0 2px}
+}
+
+/* Gewählter Akkord: groß links oben im Quintenzirkel (leere Ecke neben dem Ring) */
+.circbody{position:relative;container-type:inline-size}
+.circchord{position:absolute;left:2px;top:0;z-index:1;font-weight:800;font-size:max(1rem,4.4cqw);line-height:1.05;color:var(--acc);pointer-events:none;letter-spacing:-.02em}
+.circchord:empty{display:none}
+
+/* Breiter Bildschirm (Browser/Tablet quer): Akkord-Erklärung rechts neben der Notenzeile; Tonleiter-Karte wird niedriger, der Quintenzirkel größer */
+@media (orientation:landscape) and (min-width:1100px) and (min-height:600px){
+  .scalebody.chord{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:0 14px;min-height:270px;align-items:start}
+  .scalebody.chord .info{grid-column:2;grid-row:1;flex-direction:column;margin:6px 0 0;font-size:.8rem}
+  .scalebody.chord .scroll,.scalebody.chord .staffwrap{grid-column:1;grid-row:1;min-width:0}
+}
+
+/* Ton pulsiert kurz beim Erklingen (Notenzeile + Klaviatur) */
+.nbox,.kk{transform-box:fill-box;transform-origin:center}
+.nbox.pulse{animation:nbpulse .6s ease-out}
+@keyframes nbpulse{0%{transform:scale(1)}25%{transform:scale(1.16);fill:var(--accbg)}100%{transform:scale(1)}}
+.kk.pulse{animation:kkpulse .6s ease-out}
+@keyframes kkpulse{0%{transform:scale(1);filter:brightness(1)}25%{transform:scale(1.07);filter:brightness(1.35) saturate(1.2)}100%{transform:scale(1);filter:brightness(1)}}
+.chordplay{font-size:1.1rem}
+
+/* Akkord-Play-Knopf links neben der Notenzeile (nur bei Akkorden): runder Knopf, Platz links reserviert */
+.scalebody.chord .staffwrap{padding-left:44px}
+.starrow.chordplay{width:34px;height:34px;font-size:.95rem;line-height:1;border-radius:50%;background:var(--acc);color:#fff;border:0;z-index:3;left:2px;padding:0 0 0 3px}
+.starrow.chordplay::before{content:none;display:none}
+.starrow.chordplay:hover:not(:disabled){background:var(--acc);color:#fff;filter:brightness(1.12)}
+.scalebody.chord .clefbtn{left:50px}
+
+/* Play-Knopf oben links in der Notenzeile (frei neben dem Schlüssel, vor den Notennamen); Einklapp-Pfeil ganz rechts oben */
+.staffplay{position:absolute;left:4px;top:6px;z-index:3;width:34px;height:34px;min-height:0;padding:0 0 0 3px;border-radius:50%;
+  background:var(--card);border:2px solid var(--acc);color:var(--acc);font-size:.9rem;line-height:1;display:flex;align-items:center;justify-content:center}
+.staffplay:hover{background:var(--acc);color:#fff}
+.schead .pchev{margin-left:auto!important}
+@media (max-width:640px){.staffplay{width:30px;height:30px;left:2px;top:4px}}
+
+/* Griffbrett-Kopf: bei mittlerer Breite umbrechen, damit der Titel („Gitarre – Em“) nicht abgeschnitten wird */
+@media (max-width:1320px){.fbhead{flex-wrap:wrap}.fbhead .ptitle{flex:1 1 100%;margin-right:0}}
+
+/* Griffbrett-Kopf: Titel + Instrument links, Dur/Moll, Max ohne Text ganz rechts, kein Einklapp-Pfeil */
+.fbhead .pchev{display:none!important}
+.fbhead .ptitle{flex:0 0 auto!important;margin-right:0!important}
+.fbhead #fbMax{margin-left:auto;padding:3px 12px;font-size:1.05rem;line-height:1}
+.fbhead #fbDM button{min-height:34px;padding:3px 12px}
+@media (max-width:640px){
+  .fbhead .ptitle{flex:1 1 auto!important}
+  .fbhead #fbMax{order:1;margin-left:0}
+  .fbhead #fbInst{order:3}.fbhead #fbDM{order:3}.fbhead #fbLabel{order:4}
+  .fbhead #fbDM button{min-height:28px;padding:2px 8px;font-size:.8rem}
+}
+
+/* Layout: keine Seitenüberschrift mehr; Tonart groß unter „Quintenzirkel“ (statt in der Kopfzeile), nur der Grundton bei Tonleiter/Griffbrett */
+.panel:not(.collapsed) #circKey{display:none}
+.panel.collapsed #circKey{display:inline}
+#title,#fbTitle{font-size:1.3rem;font-weight:800;margin-left:8px;color:var(--acc);display:inline!important}
+.schead .pkey#title{display:inline!important}
+@media (max-width:640px){
+  .fbhead .ptitle{flex:0 0 auto!important}
+  .fbhead #fbDM{order:1}
+  .fbhead #fbMax{order:2;margin-left:auto}
+  .fbhead #fbInst{order:3}.fbhead #fbLabel{order:4}
+}
+
+/* Klaviatur: Tasten sind klickbar (stellen das Griffbrett um) */
+#keys .kk{cursor:pointer}
+#keys text{pointer-events:none}
+
+/* Intervalle des Akkords unter dem Akkordnamen im Quintenzirkel */
+.circchord small{display:block;margin-top:.25em;max-width:42cqw;font-size:max(.68rem,1.7cqw);font-weight:600;letter-spacing:0;line-height:1.25;color:var(--muted,var(--fg))}
+.theory{display:block;margin-top:.4rem;font-size:.85rem}.theory summary{cursor:pointer;font-weight:700;color:var(--acc)}.theory p{margin:.35rem 0 0;font-weight:400}
+
+/* Schalter „Einfach / Korrekt“ unten rechts im Quintenzirkel */
+.spellsw{position:absolute;right:2px;bottom:2px;z-index:2;display:inline-flex;border:1px solid var(--line,#c9c4b8);border-radius:999px;overflow:hidden;background:var(--card)}
+.spellsw[hidden]{display:none}
+.spellsw button{border:0;background:transparent;color:var(--fg);font:inherit;font-size:.78rem;font-weight:600;padding:.25rem .6rem;cursor:pointer}
+.spellsw button.on{background:var(--acc);color:#fff}
+
+/* Tonleiter: ausgeklappt zeigen die Schalter „E-Dur | cis-Moll“ die Tonart, der Titel wiederholt sie nicht */
+.panel:not(.collapsed) .schead .pkey#title:not(.chordname){display:none!important}
+
+.shapemore{font-weight:800;min-width:2rem}.shapemore[hidden]{display:none}.shapemore[aria-pressed=true]{background:var(--accbg);color:var(--acc)}
