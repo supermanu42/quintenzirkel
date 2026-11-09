@@ -59,6 +59,9 @@ function drawStaff(notes) {
   document.getElementById('stDown').style.display = document.getElementById('stUp').style.display = notes.isChord ? 'none' : '';
   const cp = document.getElementById('chordPlay');
   cp.style.display = notes.isChord ? '' : 'none';
+  const pl = document.getElementById('play');                  // Beschriftung: oben Akkord zusammen, links davon Töne nacheinander
+  pl.title = pl.ariaLabel = notes.isChord ? 'Akkord anhören (alle Töne zusammen)' : 'Nacheinander abspielen';
+  cp.title = cp.ariaLabel = 'Akkordtöne nacheinander anhören';
   document.getElementById('stDown').disabled = staffShift <= -14;
   document.getElementById('stUp').disabled = staffShift >= 14;
   // Schmaler Platz (Handy hochkant): kompakte Notenzeile – kleiner, nur angedeuteter Schlüssel –, damit sie ohne Seitwärtswischen ganz sichtbar ist

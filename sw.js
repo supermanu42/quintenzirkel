@@ -2,7 +2,7 @@
 
 /* Service Worker: legt alle App-Dateien in den Cache, damit die App offline läuft.
  * Nach Änderungen an Dateien die Versionsnummer CACHE erhöhen. */
-const CACHE = 'quintenzirkel-v69';
+const CACHE = 'quintenzirkel-v71';
 const FILES = [
   './',
   './index.html',

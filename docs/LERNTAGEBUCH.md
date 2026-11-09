@@ -707,3 +707,10 @@ Kleine Aufgaben, aufsteigend nach Schwierigkeit:
 - Am Anfang zeigt die Ansicht „Akkord“ nur die einfachen Griffe (offen + Barré-Formen E/A im unteren Bereich). Ein kleines „+“ rechts neben den Pfeilen blendet weitere ein (Tooltip nennt die Anzahl), „−“ geht zurück. Das „+“ erscheint nur, wenn es weitere gibt.
 - Neue Griffe (alle Standardformen, automatisch geprüft: nur Akkordtöne, Grundton tiefster Ton, ≤ 4 Bünde Spannweite, ≤ Bund 15, 588 Griffbilder): Vierklänge auf den hohen Saiten (D-Form, z. B. Dm7 = xx0211) für 7, m7, maj7, m7♭5, m(maj7), sus2/4, 6, m6, dim7, aug; Am7 mit dem kleinen Finger (A-Form-Variante x02213 → Dm7 x57768); C-Form mit der Grundtonsaite A (Dur, 7, m7, z. B. D = x54232); eine Oktave höher liegende Wiederholungen ebenfalls unter „+“.
 - Hinweis: Diese Formen stammen aus gängigem Griffwissen, nicht aus einer neuen Quelle; die Nachricht war am Ende abgeschnitten. Cache: v69.
+
+## Abspielknöpfe bei Akkorden vertauscht
+- Ist ein Akkord gewählt, spielt der obere ▶-Knopf in der Notenzeile den Akkord (alle Töne zusammen), der Knopf links davon die Töne nacheinander. Vorher war es umgekehrt. Ohne Akkord bleibt alles wie gewohnt (▶ spielt die Tonleiter). Tooltips passen sich an. Cache: v70.
+
+## Fehler: einfacher Dur-Akkord blieb bei „Moll“ stehen
+- Ursache: Der gewählte Akkord „Dur“ (Dreiklang) hat eine feste Qualität. Beim Umschalten oben auf e-Moll wechselte nur der Grundton (G → E), der Akkord blieb Dur und klang wie E-Dur; ebenso blieb am Griffbrett bei „Moll“ der Dur-Akkord.
+- Behoben: Der einfache Dreiklang („Dur“/„Moll“) folgt jetzt dem Dur/Moll-Schalter (oben, am Griffbrett und beim Tastendruck auf der Klaviatur, der Dur einstellt); das Griffbrett behält dabei seinen Grundton. Automatisch getestet: G-Dur → e-Moll spielt E–G–H; Taste D → Moll gibt d-Moll (D–F–A) mit passenden Griffbildern. Sonderakkorde (maj7, m7 …) behalten ihre feste Qualität. Cache: v71.

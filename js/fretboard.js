@@ -348,7 +348,7 @@ function initFretboard() {
   [['Dur', 'dur'], ['Moll', 'moll']].forEach(([txt, k]) => {
     const b = document.createElement('button');
     b.type = 'button'; b.textContent = txt; b.dataset.k = k;
-    b.onclick = () => { fb.minor = k === 'moll'; drawFretboard(); };
+    b.onclick = () => { fb.minor = k === 'moll'; syncTriadChord(fb.minor); drawFretboard(); };
     dm.appendChild(b);
   });
   document.getElementById('lagePrev').onclick = () => selectLage(fb.lage - 1);
@@ -428,6 +428,17 @@ function setMax(on) {
  * render() setzt sie bei jeder Änderung oben (fbSetKey); ein Tastendruck auf der Klaviatur oder der Dur/Moll-Schalter am Griffbrett ändert nur das Griffbrett.
  * Dur/Moll am Griffbrett heißt: gleicher Grundton (G-Dur ↔ g-Moll), nicht die Paralleltonart.
  */
+/** Ist der einfache Dur-/Moll-Dreiklang gewählt, folgt er dem Dur/Moll-Schalter (sonst bliebe bei „Moll“ der Dur-Akkord stehen). Das Griffbrett behält dabei seinen Grundton. */
+function syncTriadChord(minor) {
+  if (st.chord !== 'dur' && st.chord !== 'moll') return;
+  const want = minor ? 'moll' : 'dur';
+  if (st.chord === want) return;
+  const pc = fb.pc;
+  st.chord = want;
+  render();                                   // Notenzeile, Kreis und Info oben zeigen nun den passenden Dreiklang
+  fb.pc = pc; fb.minor = minor;
+}
+
 function fbSetKey(l, a, isMin) {
   fb.pc = (PC[l] + a + 12) % 12;
   fb.minor = !!isMin;

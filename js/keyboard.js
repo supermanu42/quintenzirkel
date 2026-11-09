@@ -13,6 +13,7 @@ function keyClicked(m) {
   playMidis([m]);
   const pc = ((m % 12) + 12) % 12, [l, a] = MAJ.find(([ll, aa]) => (PC[ll] + aa + 12) % 12 === pc);
   fbSetKey(l, a, false);
+  syncTriadChord(false);                // ein Tastendruck stellt Dur ein – der einfache Dreiklang folgt
 }
 
 function drawKeys(notes) {

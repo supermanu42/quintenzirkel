@@ -94,7 +94,7 @@ quintenzirkel/              ← Wurzel des Repositorys, hier liegt .git
     git commit -m "Griffbrett: Geige ergänzt"
     git push
     ```
-14. **Nicht vergessen:** Wurden App-Dateien geändert, in `sw.js` die Nummer bei `CACHE` hochzählen (`quintenzirkel-v69` → `v70`). Kommt eine neue Datei dazu, auch in die Liste `FILES` eintragen. Sonst sehen installierte Apps weiter die alte Version.
+14. **Nicht vergessen:** Wurden App-Dateien geändert, in `sw.js` die Nummer bei `CACHE` hochzählen (`quintenzirkel-v71` → `v72`). Kommt eine neue Datei dazu, auch in die Liste `FILES` eintragen. Sonst sehen installierte Apps weiter die alte Version.
 
 ## Gute Gewohnheiten
 

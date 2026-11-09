@@ -30,7 +30,7 @@ function render() {
     b.textContent = txt;
     b.title = full;
     if (st.type === k) b.className = 'on';
-    b.onclick = () => { st.type = k; render(); playChord(currentNotes); };
+    b.onclick = () => { st.type = k; if (st.chord === 'dur' || st.chord === 'moll') st.chord = k === 'moll' ? 'moll' : 'dur'; render(); playChord(currentNotes); };   // Dreiklang folgt Dur/Moll (E-Moll ≠ E-Dur)
     modes.appendChild(b);
   });
 
@@ -83,10 +83,10 @@ document.querySelectorAll('[data-go]').forEach(b => {
 });
 document.getElementById('play').onclick = () => {          // gespielt wird, was in der Notenzeile steht (Oktave und Schlüssel)
   const n = (typeof staffShown !== 'undefined' && staffShown) || currentNotes;
-  playScale(n);                                                // Tonleiter bzw. Akkordtöne nacheinander; der Akkord-Knopf links in der Notenzeile spielt zusammen
+  if (n.isChord) playChord(n); else playScale(n);              // Akkord: alle Töne zusammen; Tonleiter: nacheinander
 };
 
-document.getElementById('chordPlay').onclick = () => playChord((typeof staffShown !== 'undefined' && staffShown) || currentNotes);
+document.getElementById('chordPlay').onclick = () => playScale((typeof staffShown !== 'undefined' && staffShown) || currentNotes);   // beim Akkord: Töne nacheinander (aufgefächert)
 
 document.querySelectorAll('[data-spell]').forEach(b => {
   b.onclick = () => {
